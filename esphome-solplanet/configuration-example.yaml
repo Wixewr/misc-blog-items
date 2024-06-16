@@ -1,0 +1,353 @@
+esphome:
+  name: solplanet
+  friendly_name: Solplanet
+
+esp8266:
+  board: esp01_1m
+
+# Enable logging
+logger:
+    level: INFO
+    baud_rate: 0
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+uart:
+  id: mod_uart
+  tx_pin: 1
+  rx_pin: 3
+  baud_rate: 9600
+  stop_bits: 1
+  parity: NONE
+
+modbus:
+  id: modbus1
+  uart_id: mod_uart
+  flow_control_pin: 15
+
+modbus_controller:
+- id: modbus_device
+  address: 0x3
+  modbus_id: modbus1
+  update_interval: 5s
+  setup_priority: -10
+
+sensor:
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Rated Power"
+  register_type: read
+  address: 1027
+  value_type: U_DWORD
+  unit_of_measurement: "W"
+  skip_updates: 50000
+  accuracy_decimals: 0
+  filters:
+  - multiply: 1
+  - clamp:
+      min_value: 1
+      max_value: 10000000
+      ignore_out_of_range: true
+  icon: "mdi:flash"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Today of inverter"
+  register_type: read
+  address: 1302
+  value_type: U_DWORD
+  device_class: energy
+  unit_of_measurement: "kWh"
+  state_class: total_increasing
+  accuracy_decimals: 1
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0.1
+      max_value: 7000
+      ignore_out_of_range: true
+  icon: "mdi:solar-power"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Total of inverter"
+  register_type: read
+  address: 1304
+  value_type: U_DWORD
+  device_class: energy
+  unit_of_measurement: "kWh"
+  state_class: total
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 1
+      max_value: 1000000
+      ignore_out_of_range: true
+  icon: "mdi:counter"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Air temperature"
+  register_type: read
+  address: 1310
+  value_type: S_WORD
+  unit_of_measurement: "°C"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0.1
+      max_value: 500
+      ignore_out_of_range: true
+  icon: "mdi:thermometer"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Boost temperature"
+  register_type: read
+  address: 1314
+  value_type: S_WORD
+  unit_of_measurement: "°C"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0.1
+      max_value: 500
+      ignore_out_of_range: true
+  icon: "mdi:thermometer-plus"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "PV1 voltage"
+  register_type: read
+  address: 1318
+  value_type: U_WORD
+  unit_of_measurement: "V"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0
+      max_value: 1000
+      ignore_out_of_range: true
+  icon: "mdi:sine-wave"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "PV1 current"
+  register_type: read
+  address: 1319
+  value_type: U_WORD
+  unit_of_measurement: "A"
+  skip_updates: 6
+  accuracy_decimals: 2 
+  filters:
+  - multiply: 0.01
+  - clamp:
+      min_value: 0
+      max_value: 5000
+      ignore_out_of_range: true
+  icon: "mdi:current-dc"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "PV2 voltage"
+  register_type: read
+  address: 1320
+  value_type: U_WORD
+  unit_of_measurement: "V"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0
+      max_value: 1000
+      ignore_out_of_range: true
+  icon: "mdi:sine-wave"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "PV2 current"
+  register_type: read
+  address: 1321
+  value_type: U_WORD
+  unit_of_measurement: "A"
+  skip_updates: 6
+  accuracy_decimals: 2 
+  filters:
+  - multiply: 0.01
+  - clamp:
+      min_value: 0
+      max_value: 5000
+      ignore_out_of_range: true
+  icon: "mdi:current-dc"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "L1 Phase voltage"
+  register_type: read
+  address: 1358
+  value_type: U_WORD
+  unit_of_measurement: "V"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0
+      max_value: 1000
+      ignore_out_of_range: true
+  icon: "mdi:sine-wave"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "L1 Phase current"
+  register_type: read
+  address: 1359
+  value_type: U_WORD
+  unit_of_measurement: "A"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0
+      max_value: 5000
+      ignore_out_of_range: true
+  icon: "mdi:flash-outline"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "L2 Phase voltage"
+  register_type: read
+  address: 1360
+  value_type: U_WORD
+  unit_of_measurement: "V"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0
+      max_value: 1000
+      ignore_out_of_range: true
+  icon: "mdi:sine-wave"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "L2 Phase current"
+  register_type: read
+  address: 1361
+  value_type: U_WORD
+  unit_of_measurement: "A"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0
+      max_value: 5000
+      ignore_out_of_range: true
+  icon: "mdi:flash-outline"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "L3 Phase voltage"
+  register_type: read
+  address: 1362
+  value_type: U_WORD
+  unit_of_measurement: "V"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0
+      max_value: 1000
+      ignore_out_of_range: true
+  icon: "mdi:sine-wave"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "L3 Phase current"
+  register_type: read
+  address: 1363
+  value_type: U_WORD
+  unit_of_measurement: "A"
+  skip_updates: 6
+  accuracy_decimals: 1 
+  filters:
+  - multiply: 0.1
+  - clamp:
+      min_value: 0
+      max_value: 5000
+      ignore_out_of_range: true
+  icon: "mdi:flash-outline"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Grid frequency"
+  register_type: read
+  address: 1367
+  value_type: U_WORD
+  unit_of_measurement: "Hz"
+  skip_updates: 24
+  accuracy_decimals: 2 
+  filters:
+  - multiply: 0.01
+  - clamp:
+      min_value: 0.1
+      max_value: 200
+      ignore_out_of_range: true
+  icon: "mdi:current-ac"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Active power"
+  register_type: read
+  address: 1370
+  value_type: U_DWORD
+  unit_of_measurement: "W"
+  accuracy_decimals: 0
+  filters:
+  - multiply: 1
+  - clamp:
+      min_value: 0
+      max_value: 10000
+      ignore_out_of_range: true
+  icon: "mdi:flash"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Error message:please refer to section 3.4"
+  skip_updates: 1000
+  register_type: read
+  address: 1377
+  value_type: S_WORD
+  icon: "mdi:alert-circle-outline"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Warning message:please refer to section 3.4"
+  skip_updates: 1000
+  register_type: read
+  address: 1378
+  value_type: S_WORD
+  icon: "mdi:alert-outline"
+
+- platform: modbus_controller
+  modbus_controller_id: modbus_device
+  name: "Device State: 0 = Wait 1 = Normal 2 = Fault 4 = Checking"
+  skip_updates: 1000
+  register_type: read
+  address: 1308
+  value_type: S_WORD
+  icon: "mdi:information-outline"
