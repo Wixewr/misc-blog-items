@@ -24,7 +24,7 @@ uart:
 modbus:
   id: modbus1
   uart_id: mod_uart
-  flow_control_pin: 15
+  flow_control_pin: 14
 
 modbus_controller:
 - id: modbus_device
